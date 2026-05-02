@@ -1,0 +1,7 @@
+src/node_modules
+src/dist
+.wwebjs_auth
+.wwebjs_cache
+.git
+.DS_Store
+npm-debug.log

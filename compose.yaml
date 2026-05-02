@@ -1,0 +1,24 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bot-image:dev
+    container_name: bot-container
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    environment:
+      NODE_OPTIONS: "--no-deprecation"
+      WWEBJS_AUTH_DIR: /app/.wwebjs_auth
+      WWEBJS_WEB_VERSION: "2.3000.1038512107-alpha"
+      WWEBJS_WEB_VERSION_REMOTE_PATH: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html"
+      LOG_INCOMING_MESSAGES: "true"
+      REPLY_IN_GROUPS: "false"
+    volumes:
+      - whatsapp-auth:/app/.wwebjs_auth
+      - whatsapp-cache:/app/.wwebjs_cache
+      - ./src/config.json:/app/dist/config.json:ro  # Solo en dev
+volumes:
+  whatsapp-auth:
+  whatsapp-cache:

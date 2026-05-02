@@ -1,0 +1,8 @@
+node_modules/
+src/node_modules/
+src/dist/
+.wwebjs_auth/
+.wwebjs_cache/
+.env
+*.local
+.claude/

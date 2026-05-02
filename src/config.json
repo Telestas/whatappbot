@@ -1,0 +1,26 @@
+{
+  "contacts": [
+    {
+      "name": "aleco",
+      "phone": "5358170750",
+      "response": "Dame la mita de tu salario"
+    },
+    {
+      "name": "anais",
+      "phone": "5355660264",
+      "response": "Llegue vivo"
+    },
+    {
+      "name": "dani",
+      "phone": "5356068661",
+      "response": "Gei"
+    },
+    {
+      "name": "aleco-2",
+      "phone": "5350932259",
+      "response": "Hola"
+    }
+  ],
+  "admins": ["5358170750"],
+  "defaultReply": "Hola mi nombre es Nolan, soy tu asistente de whatsapp y estoy disponible 24h para cualquier duda que puedas tener"
+}
