@@ -24,6 +24,8 @@ if (process.env.PUPPETEER_EXECUTABLE_PATH) {
 }
 
 let botEnabled = true;
+let messageCount = 0;
+const startTime = Date.now();
 
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err);
@@ -61,6 +63,19 @@ const shutdown = async (signal: string) => {
 
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+const formatUptime = (ms: number): string => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+};
 
 console.log(`Bot starting. Configured contacts: ${responders.size}. WhatsApp Web version: ${webVersion}`);
 
@@ -147,9 +162,10 @@ const handleIncomingMessage = async (message: Message, eventName: string) => {
     return;
   }
 
+  messageCount++;
+
   const { contactDetails, phones } = await getSenderCandidates(message);
 
-  // Admin check: look for any candidate that matches the admins set
   const adminPhone = phones.find((phone) => admins.has(phone));
   const isAdmin = adminPhone !== undefined;
 
@@ -169,6 +185,41 @@ const handleIncomingMessage = async (message: Message, eventName: string) => {
       console.log(`Bot reactivated by admin (${adminPhone})`);
       return;
     }
+
+    if (command === 'estado') {
+      const status = botEnabled ? '🟢 Activo' : '🔴 Pausado';
+      await message.reply(
+        `${status}\n` +
+        `⏱ Uptime: ${formatUptime(Date.now() - startTime)}\n` +
+        `📨 Mensajes procesados: ${messageCount}\n` +
+        `👥 Contactos configurados: ${responders.size}`
+      );
+      return;
+    }
+
+    if (command === 'contactos') {
+      const list = Array.from(responders.values())
+        .map((r) => `• ${r.name} (+${r.phone})`)
+        .join('\n');
+      await message.reply(`Contactos configurados:\n${list}`);
+      return;
+    }
+
+    if (command === 'reinicia') {
+      await message.reply('Reiniciando...');
+      console.log(`Bot restart requested by admin (${adminPhone})`);
+      process.exit(1);
+    }
+  }
+
+  // Disponible para todos, incluso cuando el bot está pausado
+  if (message.body.trim().toLowerCase() === 'ayuda') {
+    await message.reply(
+      '👋 Hola, soy Nolan, tu asistente virtual.\n' +
+      'Estoy disponible 24 horas para ayudarte con cualquier duda.\n\n' +
+      'Escríbeme lo que necesitas y te responderé enseguida.'
+    );
+    return;
   }
 
   if (!botEnabled) return;
